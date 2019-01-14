@@ -82,6 +82,7 @@ async function setupWebcam() {
 						}, false);
 					},
 					error => {
+					  resolve();
 						alert('no webcam');
 					});
 		} else {
