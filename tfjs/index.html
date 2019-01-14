@@ -10,6 +10,11 @@ body{font-family:Verdana}
 </style>
 </head>
 <body>
+<select onchange='refreshModel(this.value)'>
+  <option value="headshoulderdata">headshoulderdata</option>
+  <option value="humanparsingdata">humanparsingdata</option>
+  <option value="persondata">persondata</option>
+</select>
 <button onclick='processing=!processing;processWebCam()'>webcam</button
 Click on a test image to see the result of the segmentation by UNet<BR>
 You can also <b>drag and drop</b> an image file to process it<BR>
@@ -22,6 +27,8 @@ You can also <b>drag and drop</b> an image file to process it<BR>
 // convert animated gif to mp4
 // ffmpeg -i ~/Dropbox/fitmongo_appengine/static/images/headshot.gif -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ~/examples/Unet-for-Person-Segmentation/lolo/headshot.mp4
 var unet = null;
+var modelName = 'headshoulderdata';
+
 const imw = 224;
 const imh = 224;
 const images = `00010.jpg
@@ -32,12 +39,18 @@ const images = `00010.jpg
 laurent_denoue.jpg`.split('\n');
 async function loadUNet() {
 	console.log('loading model...');
-  const unet = await tf.loadModel('model.json');
+  const unet = await tf.loadModel(modelName + '/model.json');
   console.log('done.');
   console.log('warming up model...');
   unet.predict(tf.zeros([1, imh, imw, 3])).dispose();
   console.log('done.');
   return unet;
+}
+
+function refreshModel(newmodelname)
+{
+  modelName = newmodelname;
+  init();
 }
 
 function adjustVideoSize(width, height) {
@@ -149,7 +162,7 @@ async function init() {
   tf.tidy(() => {
   });
   
-  //imagecontainer.innerHTML = '';
+  imagecontainer.innerHTML = '';
   for (var i=0;i<images.length;i++)
   {
   	var img = document.createElement('img');
