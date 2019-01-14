@@ -1,8 +1,11 @@
+import sys
 from utils import *
-print('seg')
-seg = fingernailseg()
-# show random example from training set
-#seg.plot_example(np.random.randint(seg.X_train.__len__()))
+if len(sys.argv)>1:
+  folder = sys.argv[1]
+else:
+  folder = 'headshoulderdata'
+print('seg',folder)
+seg = fingernailseg(folder)
 # create U-Net model
 print('create_unet')
 seg.create_unet()

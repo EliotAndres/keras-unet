@@ -123,7 +123,7 @@ class fingernailseg:
         self.model.compile(optimizer = Adam(), loss = 'binary_crossentropy', metrics = [mean_iou])
         
     def build_callbacks(self):
-        checkpointer = ModelCheckpoint(filepath=folder+'_unet.h5', verbose=0, save_best_only=True, save_weights_only=True)
+        checkpointer = ModelCheckpoint(filepath=self.folder+'_unet.h5', verbose=0, save_best_only=True, save_weights_only=True)
         stop_train = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
         reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.8,
                     patience=3, min_lr=0.00001)
@@ -135,9 +135,9 @@ class fingernailseg:
                        batch_size=self.batch_size, epochs=self.epochs, callbacks=self.build_callbacks())
             
     def load_model(self):
-        self.model.load_weights('unet.h5')
-        self.model.save('unet.json')
-        print('model loaded and unet.json saved')
+        self.model.load_weights(self.folder+'_unet.h5')
+        self.model.save(self.folder+'_unet.json')
+        print('model loaded and json saved')
 
     def predict(self):
         return self.model.predict(self.X_test, batch_size=self.batch_size, verbose=0)

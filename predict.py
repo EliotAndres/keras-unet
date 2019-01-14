@@ -1,6 +1,13 @@
+import sys
 from utils import *
 import matplotlib.pyplot as plt
-seg = fingernailseg()
+
+if len(sys.argv)>1:
+  folder = sys.argv[1]
+else:
+  folder = 'headshoulderdata'
+
+seg = fingernailseg(folder)
 print('create_unet')
 seg.create_unet()
 seg.load_model()
