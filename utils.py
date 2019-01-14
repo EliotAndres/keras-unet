@@ -11,7 +11,9 @@ from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from keras import backend as K
 from keras.utils import plot_model
 import tensorflow as tf
+import tensorflowjs as tfjs
 
+mainfolder = None
 
 def mean_iou(y_true, y_pred):
     yt0 = y_true[:,:,:,0]
@@ -24,7 +26,7 @@ def mean_iou(y_true, y_pred):
 
 class fingernailseg:
     
-    folder = 'headshoulderdata' #'nails'
+    folder = None#'headshoulderdata' #'nails'
     epochs = 50
     batch_size = 4
     val_split = .1
@@ -36,7 +38,8 @@ class fingernailseg:
           self.folder = folder
         else:
           self.folder = 'headshoulderdata'
-        print('folder=',self.folder)
+        mainfolder = self.folder
+        print('init.folder=',self.folder)
         mask_files = os.listdir(self.folder + '/mask')
         raw_files = os.listdir(self.folder + '/raw')
         # find intersection of two lists
@@ -131,13 +134,19 @@ class fingernailseg:
         return callbacks
     
     def fit(self):
+        print('fit',self.folder)
+        global mainfolder
+        mainfolder = self.folder
         self.model.fit(self.X_train, self.y, validation_split=self.val_split, verbose=0, 
                        batch_size=self.batch_size, epochs=self.epochs, callbacks=self.build_callbacks())
             
     def load_model(self):
+        print('loading model weights',self.folder+'_unet.h5')
         self.model.load_weights(self.folder+'_unet.h5')
+        print('saving model as json',self.folder+'_unet.json')
         self.model.save(self.folder+'_unet.json')
-        print('model loaded and json saved')
+        print('converting model to tfjs','tfjs/' + self.folder)
+        tfjs.converters.save_keras_model(self.model, 'tfjs/' + self.folder)
 
     def predict(self):
         return self.model.predict(self.X_test, batch_size=self.batch_size, verbose=0)
@@ -161,7 +170,8 @@ class fingernailseg:
 # inheritance for training process plot 
 class PlotLearning(keras.callbacks.Callback, fingernailseg):
     def __init__(self):
-        fingernailseg.__init__(self, '')
+        print('plotlearning init',mainfolder)
+        fingernailseg.__init__(self, mainfolder)
     def on_train_begin(self, logs={}):
         self.i = 0
         self.x = []
